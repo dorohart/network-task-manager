@@ -1,28 +1,41 @@
 package Model;
 
+import Exceptions.ExepExist;
+import Exceptions.ExepUncorrect;
+
+import java.time.LocalDateTime;
 import java.util.*;
 
 public class Task {
-    private Status status;
-    private Priority priority;
     private final UUID id;
     private String name;
     private String description;
-    private User designer;
-    private final User creater;
+    private Status status;
+    private Priority priority;
+    private User executor;
+    private final User creator;
+    private final LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
-    public Task(String name, String description, User creater, Priority priority) {
-        if (name == null)
-            throw new NullPointerException("couldn't register this task, name can not be null");
+    public Task(String name, User creator, Priority priority) {
+        if (creator == null)
+            throw new IllegalArgumentException("The creator of the task cannot be null.");
         if (priority == null)
-            throw new NullPointerException("couldn't register this task, priority can not be null");
+            throw new IllegalArgumentException("The priority of the task cannot be null.");
+        validateName(name);
         this.id = UUID.randomUUID();
         this.name = name;
-        this.description = description;
-        this.creater = creater;
+        this.creator = creator;
         this.status = Status.NEEDSTODO;
         this.priority = priority;
-        System.out.println("registration of your task was successful");
+        createdAt = LocalDateTime.now();
+        updatedAt = createdAt;
+    }
+
+    public Task(String name, String description, User creator, Priority priority) {
+        this(name, creator, priority);
+        validateDescription(description);
+        this.description = description;
     }
 
     public Status getStatus() { return this.status; }
@@ -35,29 +48,81 @@ public class Task {
 
     public String getDescription() { return this.description; }
 
-    public User getDesigner() { return this.designer; }
+    public User getExecutor() { return this.executor; }
 
-    public User getCreater() { return this.creater; }
+    public User getCreator() { return this.creator; }
 
-    public void setStatus(Status status) {
-        if (status == null)
-            throw new NullPointerException("status of task can not be null");
-        this.status = status;
-    }
+    public LocalDateTime getCreatedAt() { return createdAt; }
 
-    public void setPriority(Priority priority) {
-        if (priority == null)
-            throw new NullPointerException("priority of task can not be null");
-        this.priority = priority;
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+
+    private void validateName(String name) {
+        if (name == null || name.isBlank())
+            throw new IllegalArgumentException("The name of the task cannot be empty.");
+        if (name.length() < 3 || name.length() > 30)
+            throw new ExepUncorrect("The name of the task must be between 3 and 30 characters long.", name);
+        char[] cs = name.toCharArray();
+        int cnt = 0;
+        for (int i = 0; i < name.length(); i++) {
+            if (Character.isWhitespace(cs[i])) cnt++;
+            if (cnt >= 7) throw new ExepUncorrect("The name of the task can contain up to 6 spaces.", name);
+        }
     }
 
     public void setName(String name) {
-        if (name == null || name.isEmpty())
-            throw new NullPointerException("name can not be null or empty");
+        if (this.name.equals(name))
+            throw new ExepExist("You are already using this name.", name);
+        validateName(name);
         this.name = name;
+        setUpdatedAt();
     }
 
-    public void setDescription(String description) { this.description = description; }
+    private void validateDescription(String description) {
+        if (description == null) return;
+        if (description.length() > 350)
+            throw new ExepUncorrect("Description must be no more than 350 characters.", description);
+    }
 
-    public void setDesigner(User designer) { this.designer = designer; }
+    public void setDescription(String description) {
+        if (this.description.equals(description))
+            throw new ExepExist("You are already using this description.", description);
+        validateDescription(description);
+        this.description = description;
+        setUpdatedAt();
+    }
+
+    public void setStatus(Status st) {
+        if (st == null) throw new IllegalArgumentException("The status of the task cannot be null.");
+        if (this.status.equals(st))
+            throw new ExepExist("You are already using this status of the task", st.toString());
+        this.status = st;
+        setUpdatedAt();
+    }
+
+    public void setPriority(Priority pr) {
+        if (pr == null) throw new IllegalArgumentException("The priority of the task cannot be null.");
+        if (this.priority.equals(pr))
+            throw new ExepExist("You are already using this priority of the task.", pr.toString());
+        this.priority = pr;
+        setUpdatedAt();
+    }
+
+    public void setExecutor(User executor) {
+        if (executor == null) throw new IllegalArgumentException("The incompletely of the task cannot be null");
+        if (Objects.equals(this.executor, executor))
+            throw new ExepExist("This executor of this task has been changed.", executor.toString());
+        this.executor = executor;
+        setUpdatedAt();
+    }
+
+    private void setUpdatedAt() { updatedAt = LocalDateTime.now(); }
+
+    @Override
+    public String toString() {
+        return "_Task_\nTitle: " + getName() + ", description: " + getDescription() + ",\ncreator: "
+        + creator.getLogin() + ", executor: " + (executor == null ? "not assigned" : executor.getLogin())
+                + ", priority: " + getPriority()
+        + ",status: " + getStatus() + ",\ncreated at " + getCreatedAt() + ", updated at " + getUpdatedAt();
+    }
 }
+//убрал гуи, добавляю проверки входных данных задачи, добавлено поле даты изменения
