@@ -12,12 +12,12 @@ public class Task {
     private String description;
     private Status status;
     private Priority priority;
-    private User executor;
-    private final User creator;
+    private Person executor;
+    private final Person creator;
     private final LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public Task(String name, User creator, Priority priority) {
+    public Task(String name, Person creator, Priority priority) {
         if (creator == null)
             throw new IllegalArgumentException("The creator of the task cannot be null.");
         if (priority == null)
@@ -32,7 +32,7 @@ public class Task {
         updatedAt = createdAt;
     }
 
-    public Task(String name, String description, User creator, Priority priority) {
+    public Task(String name, String description, Person creator, Priority priority) {
         this(name, creator, priority);
         validateDescription(description);
         this.description = description;
@@ -48,9 +48,9 @@ public class Task {
 
     public String getDescription() { return this.description; }
 
-    public User getExecutor() { return this.executor; }
+    public Person getExecutor() { return this.executor; }
 
-    public User getCreator() { return this.creator; }
+    public Person getCreator() { return this.creator; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
 
@@ -107,7 +107,7 @@ public class Task {
         setUpdatedAt();
     }
 
-    public void setExecutor(User executor) {
+    public void setExecutor(Person executor) {
         if (executor == null) throw new IllegalArgumentException("The incompletely of the task cannot be null");
         if (Objects.equals(this.executor, executor))
             throw new ExepExist("This executor of this task has been changed.", executor.toString());
@@ -124,5 +124,14 @@ public class Task {
                 + ", priority: " + getPriority()
         + ",status: " + getStatus() + ",\ncreated at " + getCreatedAt() + ", updated at " + getUpdatedAt();
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Task && this.getId().equals(((Task) obj).id))
+            return true;
+        return false;
+    }
+
+    @Override
+    public int hashCode() { return id.hashCode(); }
 }
-//убрал гуи, добавляю проверки входных данных задачи, добавлено поле даты изменения

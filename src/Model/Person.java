@@ -3,7 +3,7 @@ package Model;
 import Exceptions.*;
 import java.util.*;
 
-public class User {
+public class Person {
     private final UUID id;
     private String login;
     private String password;
@@ -12,7 +12,7 @@ public class User {
     private String email;
     private String secretWord;
 
-    public User(String login, String password, String phoneNumber, String email) {
+    public Person(String login, String password, String phoneNumber, String email) {
         validateLogin(login);
         validatePassword(password);
         validatePhoneNumber(phoneNumber);
@@ -25,7 +25,7 @@ public class User {
         this.email = email;
     }
 
-    public User(String login, String password, String phoneNumber, String email, String secretWord) {
+    public Person(String login, String password, String phoneNumber, String email, String secretWord) {
         this(login, password, phoneNumber, email);
         validateSecretWord(secretWord);
         this.secretWord = secretWord;
@@ -47,7 +47,7 @@ public class User {
 
     private void validateLogin(String login) {
         if (login == null || login.isBlank())
-            throw new IllegalArgumentException("Login of the user cannot be empty.");
+            throw new IllegalArgumentException("Login cannot be empty.");
         if (login.length() < 3 || login.length() > 30)
             throw new ExepUncorrect("Login must be between 3 and 30 characters long.", login);
         char[] cs = login.toCharArray();
@@ -160,9 +160,17 @@ public class User {
 
     @Override
     public String toString() {
-        return "_User_\nId: " + getID() + ", name: " + getLogin() + ", email: "
-                + getEmail() + ", phone number: " + getPhoneNumber();
+        return "_Person_\nId: " + getID() + ", name: " + getLogin() + ", email: "
+                + getEmail() + ", phone number: " + getPhoneNumber() + ", role: " + getRole();
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Person && this.getID().equals(((Person) obj).getID()))
+            return true;
+        return false;
+    }
+
+    @Override
+    public int hashCode() { return id.hashCode(); }
 }
-//изменены входные данные пользователя, убрал гуи из пользователя, обращение к базе данных, доработал проверку и
-// изменение входных данных пользователя 22.07.26, тустринг
