@@ -10,7 +10,7 @@ public class PersonRepository {
         people = new HashMap<>();
     }
 
-    public boolean existByLogin(String suggestedLogin) {
+    public boolean existsByLogin(String suggestedLogin) {
         for (Person p : people.values()) {
             if (p.getLogin().equals(suggestedLogin))
                 return true;
@@ -18,7 +18,7 @@ public class PersonRepository {
         return false;
     }
 
-    public boolean existByPhoneNumber(String suggestedPhone) {
+    public boolean existsByPhoneNumber(String suggestedPhone) {
         for (Person p : people.values()) {
             if (p.getPhoneNumber().equals(suggestedPhone))
                 return true;
@@ -26,7 +26,7 @@ public class PersonRepository {
         return false;
     }
 
-     public boolean existByEmail(String suggestedEmail) {
+     public boolean existsByEmail(String suggestedEmail) {
         for (Person p : people.values()) {
             if (p.getEmail().equals(suggestedEmail))
                 return true;

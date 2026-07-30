@@ -1,7 +1,7 @@
 package Model;
 
-import Exceptions.ExepExist;
-import Exceptions.ExepUncorrect;
+import Exceptions.ExistException;
+import Exceptions.UncorrectException;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -60,18 +60,18 @@ public class Task {
         if (name == null || name.isBlank())
             throw new IllegalArgumentException("The name of the task cannot be empty.");
         if (name.length() < 3 || name.length() > 30)
-            throw new ExepUncorrect("The name of the task must be between 3 and 30 characters long.", name);
+            throw new UncorrectException("The name of the task must be between 3 and 30 characters long.", name);
         char[] cs = name.toCharArray();
         int cnt = 0;
         for (int i = 0; i < name.length(); i++) {
             if (Character.isWhitespace(cs[i])) cnt++;
-            if (cnt >= 7) throw new ExepUncorrect("The name of the task can contain up to 6 spaces.", name);
+            if (cnt >= 7) throw new UncorrectException("The name of the task can contain up to 6 spaces.", name);
         }
     }
 
     public void setName(String name) {
         if (this.name.equals(name))
-            throw new ExepExist("You are already using this name.", name);
+            throw new ExistException("You are already using this name.", name);
         validateName(name);
         this.name = name;
         setUpdatedAt();
@@ -80,12 +80,12 @@ public class Task {
     private void validateDescription(String description) {
         if (description == null) return;
         if (description.length() > 350)
-            throw new ExepUncorrect("Description must be no more than 350 characters.", description);
+            throw new UncorrectException("Description must be no more than 350 characters.", description);
     }
 
     public void setDescription(String description) {
         if (this.description.equals(description))
-            throw new ExepExist("You are already using this description.", description);
+            throw new ExistException("You are already using this description.", description);
         validateDescription(description);
         this.description = description;
         setUpdatedAt();
@@ -94,7 +94,7 @@ public class Task {
     public void setStatus(Status st) {
         if (st == null) throw new IllegalArgumentException("The status of the task cannot be null.");
         if (this.status.equals(st))
-            throw new ExepExist("You are already using this status of the task", st.toString());
+            throw new ExistException("You are already using this status of the task", st.toString());
         this.status = st;
         setUpdatedAt();
     }
@@ -102,7 +102,7 @@ public class Task {
     public void setPriority(Priority pr) {
         if (pr == null) throw new IllegalArgumentException("The priority of the task cannot be null.");
         if (this.priority.equals(pr))
-            throw new ExepExist("You are already using this priority of the task.", pr.toString());
+            throw new ExistException("You are already using this priority of the task.", pr.toString());
         this.priority = pr;
         setUpdatedAt();
     }
@@ -110,7 +110,7 @@ public class Task {
     public void setExecutor(Person executor) {
         if (executor == null) throw new IllegalArgumentException("The incompletely of the task cannot be null");
         if (Objects.equals(this.executor, executor))
-            throw new ExepExist("This executor of this task has been changed.", executor.toString());
+            throw new ExistException("This executor of this task has been changed.", executor.toString());
         this.executor = executor;
         setUpdatedAt();
     }
