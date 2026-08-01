@@ -1,9 +1,9 @@
 package Exceptions;
 
-public class UncorrectException extends RuntimeException {
+public class ExistUserException extends Exception {
     private String symbols;
 
-    public UncorrectException(String message, String symbols) {
+    public ExistUserException(String message, String symbols) {
         super(message);
         this.symbols = symbols;
     }

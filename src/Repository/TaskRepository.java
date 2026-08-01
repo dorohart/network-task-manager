@@ -118,4 +118,24 @@ public class TaskRepository {
         }
         return ts;
     }
+    //
+    public boolean existsTasksByCreator(Person person) {
+        if (person == null)
+            throw new IllegalArgumentException("Person cannot be null.");
+        for (Task task : tasks.values()) {
+            if (task.getCreator().equals(person))
+                return true;
+        }
+        return false;
+    }
+    //
+    public boolean existsTasksByExecutor(Person person) {
+        if (person == null)
+            throw new IllegalArgumentException("Person cannot be null.");
+        for (Task task : tasks.values()) {
+            if (task.getExecutor().equals(person))
+                return true;
+        }
+        return false;
+    }
 }

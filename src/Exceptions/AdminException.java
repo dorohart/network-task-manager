@@ -1,9 +1,9 @@
 package Exceptions;
 
-public class UncorrectException extends RuntimeException {
+public class AdminException extends Exception {
     private String symbols;
 
-    public UncorrectException(String message, String symbols) {
+    public AdminException(String message, String symbols) {
         super(message);
         this.symbols = symbols;
     }

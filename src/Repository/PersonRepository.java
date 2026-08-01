@@ -45,6 +45,12 @@ public class PersonRepository {
              throw new IllegalArgumentException("You are trying to delete a user that object is null.");
         people.remove(p.getID());
      }
+    //
+     public void deletePersonByLogin(String login) {
+        if (login == null)
+            throw new IllegalArgumentException("You are trying to delete a user that login is null.");
+        people.remove(searchPersonByLogin(login).getID());
+     }
 
      public int getCountOfThisRole(Role role) {
         if (role == null)

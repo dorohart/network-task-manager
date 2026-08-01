@@ -1,7 +1,6 @@
 package Model;
 
-import Exceptions.ExistException;
-import Exceptions.UncorrectException;
+import Exceptions.*;
 
 import java.time.LocalDateTime;
 import java.util.*;
