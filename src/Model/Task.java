@@ -69,8 +69,6 @@ public class Task {
     }
 
     public void setName(String name) {
-        if (this.name.equals(name))
-            throw new ExistException("You are already using this name.", name);
         validateName(name);
         this.name = name;
         setUpdatedAt();
@@ -83,8 +81,6 @@ public class Task {
     }
 
     public void setDescription(String description) {
-        if (this.description.equals(description))
-            throw new ExistException("You are already using this description.", description);
         validateDescription(description);
         this.description = description;
         setUpdatedAt();
@@ -92,7 +88,7 @@ public class Task {
 
     public void setStatus(Status st) {
         if (st == null) throw new IllegalArgumentException("The status of the task cannot be null.");
-        if (this.status.equals(st))
+        if (st == this.status)
             throw new ExistException("You are already using this status of the task", st.toString());
         this.status = st;
         setUpdatedAt();
@@ -100,14 +96,13 @@ public class Task {
 
     public void setPriority(Priority pr) {
         if (pr == null) throw new IllegalArgumentException("The priority of the task cannot be null.");
-        if (this.priority.equals(pr))
+        if (this.priority == pr)
             throw new ExistException("You are already using this priority of the task.", pr.toString());
         this.priority = pr;
         setUpdatedAt();
     }
 
     public void setExecutor(Person executor) {
-        if (executor == null) throw new IllegalArgumentException("The incompletely of the task cannot be null");
         if (Objects.equals(this.executor, executor))
             throw new ExistException("This executor of this task has been changed.", executor.toString());
         this.executor = executor;
@@ -118,7 +113,8 @@ public class Task {
 
     @Override
     public String toString() {
-        return "_Task_\nTitle: " + getName() + ", description: " + getDescription() + ",\ncreator: "
+        return "_Task_\nTitle: " + getName() + ", description: " + (getDescription() == null ? "no" : getDescription())
+                + ",\ncreator: "
         + creator.getLogin() + ", executor: " + (executor == null ? "not assigned" : executor.getLogin())
                 + ", priority: " + getPriority()
         + ",status: " + getStatus() + ",\ncreated at " + getCreatedAt() + ", updated at " + getUpdatedAt();

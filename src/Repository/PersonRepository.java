@@ -11,6 +11,8 @@ public class PersonRepository {
     }
 
     public boolean existsByLogin(String suggestedLogin) {
+        if (suggestedLogin == null)
+            throw new IllegalArgumentException("Login cannot be null.");
         for (Person p : people.values()) {
             if (p.getLogin().equals(suggestedLogin))
                 return true;
@@ -19,6 +21,8 @@ public class PersonRepository {
     }
 
     public boolean existsByPhoneNumber(String suggestedPhone) {
+        if (suggestedPhone == null)
+            throw new IllegalArgumentException("Phone number cannot be null.");
         for (Person p : people.values()) {
             if (p.getPhoneNumber().equals(suggestedPhone))
                 return true;
@@ -27,6 +31,8 @@ public class PersonRepository {
     }
 
      public boolean existsByEmail(String suggestedEmail) {
+        if (suggestedEmail == null)
+            throw new IllegalArgumentException("Email cannot be null.");
         for (Person p : people.values()) {
             if (p.getEmail().equals(suggestedEmail))
                 return true;
@@ -45,11 +51,13 @@ public class PersonRepository {
              throw new IllegalArgumentException("You are trying to delete a user that object is null.");
         people.remove(p.getID());
      }
-    //
+
      public void deletePersonByLogin(String login) {
         if (login == null)
             throw new IllegalArgumentException("You are trying to delete a user that login is null.");
-        people.remove(searchPersonByLogin(login).getID());
+        Person p = getPersonByLogin(login);
+        if (p != null)
+            people.remove(p.getID());
      }
 
      public int getCountOfThisRole(Role role) {
@@ -65,7 +73,9 @@ public class PersonRepository {
 
      public int getCountOfPeople() { return people.size(); }
 
-    public Person searchPersonByLogin(String nameOfPerson) {
+    public Person getPersonByLogin(String nameOfPerson) {
+        if (nameOfPerson == null)
+            throw new IllegalArgumentException("Login cannot be null.");
         for (Person p : people.values()) {
             if (p.getLogin().equals(nameOfPerson))
                 return p;
@@ -73,7 +83,7 @@ public class PersonRepository {
         return null;
     }
 
-    public Person searchPersonById(UUID id) {
+    public Person getPersonById(UUID id) {
         if (id == null)
             throw new IllegalArgumentException("Id cannot be null.");
         return people.get(id);

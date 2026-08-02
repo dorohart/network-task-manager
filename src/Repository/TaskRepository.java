@@ -1,5 +1,6 @@
 package Repository;
 
+import Exceptions.PersonException;
 import Model.*;
 
 import java.time.LocalDateTime;
@@ -26,7 +27,11 @@ public class TaskRepository {
 
     public int getCount() { return tasks.size(); }
 
-    public List<Task> searchTasksByName(String text) {
+    public List<Task> getTasksByName(String text) throws PersonException{
+        if (text == null)
+            throw new IllegalArgumentException("Name of task cannot be null.");
+        if (text.isBlank())
+            throw new PersonException("Field of task name cannot be empty.", text);
         List<Task> t = new ArrayList<>();
         for (Task task : tasks.values()) {
             if (task.getName().contains(text))
@@ -35,35 +40,35 @@ public class TaskRepository {
         return t;
     }
 
-    public Task searchTaskById(UUID id) {
+    public Task getTaskById(UUID id) {
         if (id == null)
             throw new IllegalArgumentException("Id cannot be null.");
         return tasks.get(id);
     }
 
-    public List<Task> searchTasksByCreator(Person p) {
+    public List<Task> getTasksByCreator(Person p) throws PersonException {
         if (p == null)
             throw new IllegalArgumentException("Object of person cannot be null");
         List<Task> crTasks = new ArrayList<>();
         for (Task task : tasks.values()) {
-            if (task.getCreator().equals(p))
+            if (p.equals(task.getCreator()))
                 crTasks.add(task);
         }
         return crTasks;
     }
 
-    public List<Task> searchTasksByExecutor(Person p) {
+    public List<Task> getTasksByExecutor(Person p) {
         if (p == null)
             throw new IllegalArgumentException("Object of person cannot be null");
         List<Task> exTasks = new ArrayList<>();
         for (Task task : tasks.values()) {
-            if (Objects.equals(task.getExecutor(), p))
+            if (p.equals(task.getExecutor()))
                 exTasks.add(task);
         }
         return exTasks;
     }
 
-    public List<Task> searchTasksByPriority(Priority pr) {
+    public List<Task> getTasksByPriority(Priority pr) {
         if (pr == null)
             throw new IllegalArgumentException("Priority of the task cannot be null.");
         List<Task> prTasks = new ArrayList<>();
@@ -74,7 +79,7 @@ public class TaskRepository {
         return prTasks;
     }
 
-    public List<Task> searchTasksByStatus(Status st) {
+    public List<Task> getTasksByStatus(Status st) {
         if (st == null)
             throw new IllegalArgumentException("Status of the task cannot be null.");
         List<Task> stTasks = new ArrayList<>();
@@ -93,7 +98,7 @@ public class TaskRepository {
         return tasks.containsKey(id);
     }
 
-    public List<Task> searchTasksCreatedBetween(LocalDateTime start, LocalDateTime finish) {
+    public List<Task> getTasksCreatedBetween(LocalDateTime start, LocalDateTime finish) {
         if (start == null || finish == null)
             throw new IllegalArgumentException("Object of LocalDateTime cannot be null.");
         if (start.compareTo(finish) > 0)
@@ -106,7 +111,7 @@ public class TaskRepository {
         return ts;
     }
 
-    public List<Task> searchTasksUpdatedBetween(LocalDateTime start, LocalDateTime finish) {
+    public List<Task> getTasksUpdatedBetween(LocalDateTime start, LocalDateTime finish) {
         if (start == null || finish == null)
             throw new IllegalArgumentException("Object of LocalDateTime cannot be null.");
         if (start.compareTo(finish) > 0)
@@ -118,22 +123,22 @@ public class TaskRepository {
         }
         return ts;
     }
-    //
+
     public boolean existsTasksByCreator(Person person) {
         if (person == null)
             throw new IllegalArgumentException("Person cannot be null.");
         for (Task task : tasks.values()) {
-            if (task.getCreator().equals(person))
+            if (person.equals(task.getCreator()))
                 return true;
         }
         return false;
     }
-    //
+
     public boolean existsTasksByExecutor(Person person) {
         if (person == null)
             throw new IllegalArgumentException("Person cannot be null.");
         for (Task task : tasks.values()) {
-            if (task.getExecutor().equals(person))
+            if (person.equals(task.getExecutor()))
                 return true;
         }
         return false;

@@ -59,8 +59,6 @@ public class Person {
     }
 
     public void setLogin(String login) {
-        if (this.login.equals(login))
-            throw new ExistException("You are already using this login.", login);
         validateLogin(login);
         this.login = login;
     }
@@ -84,8 +82,6 @@ public class Person {
     }
 
     public void setPassword(String password) {
-        if (this.password.equals(password))
-            throw new ExistException("You are already using this password.", password);
         validatePassword(password);
         this.password = password;
     }
@@ -106,8 +102,6 @@ public class Person {
     }
 
     public void setPhoneNumber(String phoneNumber) {
-        if (this.phoneNumber.equals(phoneNumber))
-            throw new ExistException("You are already using this phone number.", phoneNumber);
         validatePhoneNumber(phoneNumber);
         this.phoneNumber = phoneNumber;
     }
@@ -131,8 +125,6 @@ public class Person {
     }
 
     public void setEmail(String email) {
-        if (this.email.equals(email))
-            throw new ExistException("You are already using this email.", email);
         validateEmail(email);
         this.email = email;
     }
@@ -145,15 +137,13 @@ public class Person {
     }
 
     public void setSecretWord(String secretWord) {
-        if (this.secretWord.equals(secretWord))
-            throw new ExistException("You are already using this secret word.", secretWord);
         validateSecretWord(secretWord);
         this.secretWord = secretWord;
     }
 
     public void setRole(Role r) {
         if (r == null) throw new IllegalArgumentException("Role of person cannot be null.");
-        if (this.role.equals(r))
+        if (this.role == r)
             throw new ExistException("You are already using this role of person.", r.toString());
         this.role = r;
     }
