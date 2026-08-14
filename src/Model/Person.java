@@ -142,9 +142,8 @@ public class Person {
     }
 
     public void setRole(Role r) {
-        if (r == null) throw new IllegalArgumentException("Role of person cannot be null.");
-        if (this.role == r)
-            throw new ExistException("You are already using this role of person.", r.toString());
+        if (r == null)
+            throw new IllegalArgumentException("Role of person cannot be null.");
         this.role = r;
     }
 

@@ -87,17 +87,15 @@ public class Task {
     }
 
     public void setStatus(Status st) {
-        if (st == null) throw new IllegalArgumentException("The status of the task cannot be null.");
-        if (st == this.status)
-            throw new ExistException("You are already using this status of the task", st.toString());
+        if (st == null)
+            throw new IllegalArgumentException("The status of the task cannot be null.");
         this.status = st;
         setUpdatedAt();
     }
 
     public void setPriority(Priority pr) {
-        if (pr == null) throw new IllegalArgumentException("The priority of the task cannot be null.");
-        if (this.priority == pr)
-            throw new ExistException("You are already using this priority of the task.", pr.toString());
+        if (pr == null)
+            throw new IllegalArgumentException("The priority of the task cannot be null.");
         this.priority = pr;
         setUpdatedAt();
     }

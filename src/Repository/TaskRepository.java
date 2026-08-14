@@ -1,5 +1,6 @@
 package Repository;
 
+import Exceptions.AdminException;
 import Exceptions.PersonException;
 import Model.*;
 
@@ -142,5 +143,53 @@ public class TaskRepository {
                 return true;
         }
         return false;
+    }
+
+    public int getCountOfTasksInProcessByCreator(Person person) throws PersonException {
+        if (person == null)
+            throw new IllegalArgumentException("Person cannot be null.");
+        if (person.getRole() != Role.ADMIN)
+            throw new PersonException("The current person cannot create tasks.", person.toString());
+        int count = 0;
+        for (Task temp : tasks.values()) {
+            if (person.equals(temp.getCreator()) && temp.getStatus() == Status.INPROCESS)
+                count++;
+        }
+        return count;
+    }
+
+    public int getCountOfDoneTasksByCreator(Person person) throws PersonException {
+        if (person == null)
+            throw new IllegalArgumentException("Person cannot be null.");
+        if (person.getRole() != Role.ADMIN)
+            throw new PersonException("The current person cannot create tasks.", person.toString());
+        int count = 0;
+        for (Task temp : tasks.values()) {
+            if (person.equals(temp.getCreator()) && temp.getStatus() == Status.DONE)
+                count++;
+        }
+        return count;
+    }
+
+    public int getCountOfTasksInProcessByExecutor(Person person) {
+        if (person == null)
+            throw new IllegalArgumentException("Person cannot be null.");
+        int count = 0;
+        for (Task temp : tasks.values()) {
+            if (person.equals(temp.getExecutor()) && temp.getStatus() == Status.INPROCESS)
+                count++;
+        }
+        return count;
+    }
+
+    public int getCountOfDoneTasksByExecutor(Person person) {
+        if (person == null)
+            throw new IllegalArgumentException("Person cannot be null.");
+        int count = 0;
+        for (Task temp : tasks.values()) {
+            if (person.equals(temp.getExecutor()) && temp.getStatus() == Status.DONE)
+                count++;
+        }
+        return count;
     }
 }

@@ -34,8 +34,6 @@ public class PersonService {
     }
 
     public void delete(Person person) throws AdminException {
-        if (person == null)
-            throw new IllegalArgumentException("The current person cannot be null.");
         if (taskRep.existsTasksByCreator(person))
             throw new ExistException("The person did not delete his tasks", person.toString());
         if (taskRep.existsTasksByExecutor(person))
@@ -45,15 +43,25 @@ public class PersonService {
         personRep.deletePerson(person);
     }
 
+    public void deleteOther(Person person, String login) throws PersonException {
+        if (person == null)
+            throw new IllegalArgumentException("The current person cannot be null.");
+        if (person.getRole() != Role.ADMIN)
+            throw new PersonException("Current person cannot delete other persons.", person.toString());
+        Person other = personRep.getPersonByLogin(login);
+        if (other == null)
+            throw new PersonException("Person with this login not found.", login);
+        if (other.getRole() == Role.ADMIN)
+            throw new PersonException("Cannot delete an admin.", personRep.getPersonByLogin(login).toString());
+        for (Task task : taskRep.getTasksByExecutor(other)) {
+            task.setExecutor(null);
+        }
+        personRep.deletePerson(other);
+    }
+
     public Person login(String login, String password) throws PersonException {
-        if (login == null)
-            throw new IllegalArgumentException("Login cannot be null.");
         if (password == null)
             throw new IllegalArgumentException("Password cannot be null.");
-        if (login.isBlank())
-            throw new PersonException("Field of login cannot be empty.", login);
-        if (password.isBlank())
-            throw new PersonException("Field of password cannot be empty.", password);
         Person person = personRep.getPersonByLogin(login);
         if (person == null)
             throw new PersonException("Input login is incorrect.", login);
@@ -67,10 +75,6 @@ public class PersonService {
             throw new IllegalArgumentException("The current person cannot be null.");
         if (password == null)
             throw new IllegalArgumentException("Password cannot be null.");
-        if (newLogin.isBlank())
-            throw new PersonException("Field of the new login cannot be empty.", newLogin);
-        if (password.isBlank())
-            throw new PersonException("Field of password cannot be empty.", password);
         if (personRep.existsByLogin(newLogin))
             throw new ExistUserException("This login already exists.", newLogin);
         if (!person.getPassword().equals(password))
@@ -79,16 +83,10 @@ public class PersonService {
     }
 
     public void changePassword(Person person, String newPassword, String code) throws PersonException {
-        if (newPassword == null)
-            throw new IllegalArgumentException("Password cannot be null.");
         if (person == null)
             throw new IllegalArgumentException("The current person cannot be null.");
         if (code == null)
             throw new IllegalArgumentException("Code cannot be null.");
-        if (newPassword.isBlank())
-            throw new PersonException("Field of the new password cannot be empty.", newPassword);
-        if (code.isBlank())
-            throw new PersonException("Field of code cannot be empty.", code);
         if (!VerificationService.verify(code))
             throw new PersonException("Invalid person code", code);
         if (person.getPassword().equals(newPassword))
@@ -101,10 +99,6 @@ public class PersonService {
             throw new IllegalArgumentException("The current person cannot be null.");
         if (code == null)
             throw new IllegalArgumentException("Code cannot be null.");
-        if (newPhoneNumber.isBlank())
-            throw new PersonException("Field of the new phone number cannot be empty.", newPhoneNumber);
-        if (code.isBlank())
-            throw new PersonException("Field of code cannot be empty.", code);
         if (personRep.existsByPhoneNumber(newPhoneNumber))
             throw new ExistUserException("This phone number already exists.", newPhoneNumber);
         if (!VerificationService.verify(code))
@@ -119,10 +113,6 @@ public class PersonService {
             throw new IllegalArgumentException("The current person cannot be null.");
         if (code == null)
             throw new IllegalArgumentException("Code cannot be null.");
-        if (newEmail.isBlank())
-            throw new PersonException("Field of the new email cannot be empty.", newEmail);
-        if (code.isBlank())
-            throw new PersonException("Field of code cannot be empty.", code);
         if (personRep.existsByEmail(newEmail))
             throw new ExistUserException("This email already exists.", newEmail);
         if (!VerificationService.verify(code))
@@ -133,16 +123,10 @@ public class PersonService {
     }
 
     public void changeSecretWord(Person person, String newSecretWord, String code) throws PersonException {
-        if (newSecretWord == null)
-            throw new IllegalArgumentException("Secret word cannot be null.");
         if (person == null)
             throw new IllegalArgumentException("The current person cannot be null.");
         if (code == null)
             throw new IllegalArgumentException("Code cannot be null.");
-        if (newSecretWord.isBlank())
-            throw new PersonException("Field of the new secret word cannot be empty.", newSecretWord);
-        if (code.isBlank())
-            throw new PersonException("Field of code cannot be empty.", code);
         if (!VerificationService.verify(code))
             throw new PersonException("Invalid person code", code);
         if (person.getSecretWord().equals(newSecretWord))
@@ -151,8 +135,6 @@ public class PersonService {
     }
 
     public Person getPersonByLogin(String login) throws PersonException {
-        if (login.isBlank())
-            throw new PersonException("Field of login cannot be empty.", login);
         if (!personRep.existsByLogin(login))
             throw new PersonException("Person with this login not found.", login);
         return personRep.getPersonByLogin(login);
@@ -173,8 +155,6 @@ public class PersonService {
     public void makeAdmin(Person currentPerson, String loginOfUser) throws AdminException, PersonException {
         if (currentPerson == null)
             throw new IllegalArgumentException("Current person cannot be null.");
-        if (loginOfUser.isBlank())
-            throw new PersonException("Field of login cannot be empty.", loginOfUser);
         if (currentPerson.getRole() != Role.ADMIN)
             throw new AdminException("The current person cannot be made an admins.", currentPerson.toString());
         Person newAdmin = personRep.getPersonByLogin(loginOfUser);
@@ -183,5 +163,9 @@ public class PersonService {
         if (newAdmin.getRole() == Role.ADMIN)
             throw new PersonException("This person is already an admin.", newAdmin.toString());
         newAdmin.setRole(Role.ADMIN);
+    }
+
+    public int getCount() {
+        return personRep.getCount();
     }
 }

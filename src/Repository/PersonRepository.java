@@ -1,5 +1,6 @@
 package Repository;
 
+import Exceptions.PersonException;
 import Model.*;
 import java.util.*;
 
@@ -52,12 +53,12 @@ public class PersonRepository {
         people.remove(p.getID());
      }
 
-     public void deletePersonByLogin(String login) {
-        if (login == null)
-            throw new IllegalArgumentException("You are trying to delete a user that login is null.");
-        Person p = getPersonByLogin(login);
+     public void deletePersonByLogin(String login) throws PersonException {
+        Person p = this.getPersonByLogin(login);
         if (p != null)
             people.remove(p.getID());
+        else
+            throw new PersonException("Person with this login not found.", login);
      }
 
      public int getCountOfThisRole(Role role) {
@@ -95,5 +96,9 @@ public class PersonRepository {
         if (id == null)
             throw new IllegalArgumentException("Id cannot be null.");
         return people.containsKey(id);
+    }
+
+    public int getCount() {
+        return people.size();
     }
 }

@@ -24,6 +24,8 @@ public class TaskService {
     public void create(String name, String description, Person creator, Priority priority) throws PersonException{
         if (creator.getRole() != Role.ADMIN)
             throw new PersonException("Current person cannot create the task.", creator.toString());
+        if (taskRep.getCountOfTasksInProcessByCreator(creator) >= 3)
+            throw new PersonException("Person cannot create more that 3 tasks.", creator.toString());
         Task task;
         if (description == null)
             task = new Task(name, creator, priority);
@@ -43,6 +45,8 @@ public class TaskService {
     }
 
     public List<Task> getTasksByCreator(Person person) throws PersonException {
+        if (person == null)
+            throw new IllegalArgumentException("Person cannot be null.");
         if (person.getRole() != Role.ADMIN)
             throw new PersonException("The current person cannot be the creator.", person.toString());
         return taskRep.getTasksByCreator(person);
@@ -66,15 +70,15 @@ public class TaskService {
         return taskRep.getTasksUpdatedBetween(start, finish);
     }
 
+    public int getCount() {
+        return taskRep.getCount();
+    }
+
     public void changeName(Person person, Task task, String newName) throws PersonException {
         if (person == null)
             throw new IllegalArgumentException("Person cannot be null.");
         if (task == null)
             throw new IllegalArgumentException("Task cannot be null.");
-        if (newName == null)
-            throw new IllegalArgumentException("Name of task cannot be null.");
-        if (newName.isBlank())
-            throw new PersonException("Field of task name cannot be empty.", newName);
         if (!person.equals(task.getCreator()))
             throw new PersonException("This person cannot change the task.", person.toString());
         if (newName.equals(task.getName()))
@@ -101,8 +105,6 @@ public class TaskService {
             throw new IllegalArgumentException("Person cannot be null.");
         if (task == null)
             throw new IllegalArgumentException("Task cannot be null.");
-        if (priority == null)
-            throw new IllegalArgumentException("Priority of task cannot be null.");
         if (!person.equals(task.getCreator()))
             throw new PersonException("This person cannot change the task.", person.toString());
         if (task.getPriority() == priority)
@@ -115,8 +117,6 @@ public class TaskService {
             throw new IllegalArgumentException("Person cannot be null.");
         if (task == null)
             throw new IllegalArgumentException("Task cannot be null.");
-        if (status == null)
-            throw new IllegalArgumentException("Status of task cannot be null.");
         if (!person.equals(task.getCreator()))
             throw new PersonException("This person cannot change the task.", person.toString());
         if (task.getStatus() == status)
@@ -137,10 +137,20 @@ public class TaskService {
     public Task getTaskByNumber(List<Task> tasks, int number) throws PersonException {
         if (tasks == null)
             throw new IllegalArgumentException("Set of tasks cannot be null.");
-        if (tasks.size() == 0)
-            throw new PersonException("Set of tasts is empty.", tasks.toString());
+        if (tasks.isEmpty())
+            throw new PersonException("Set of tasks is empty.", tasks.toString());
         if (number <= 0 || number > tasks.size())
             throw new PersonException("Uncorrect number of task.", Integer.toString(number));
         return tasks.get(number - 1);
+    }
+
+    public void addExecutor(Person person, Task task) throws PersonException {
+        if (task == null)
+            throw new IllegalArgumentException("Task cannot be null.");
+        if (taskRep.getCountOfTasksInProcessByExecutor(person) >= 3)
+            throw new PersonException("Person cannot execute more that 3 tasks.", person.toString());
+        if (task.getExecutor() != null)
+            throw new ExistException("This task already has an executor.", task.toString());
+        task.setExecutor(person);
     }
 }
