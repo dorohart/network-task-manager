@@ -3,12 +3,13 @@ package Repository;
 import Exceptions.PersonException;
 import Model.*;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class PersonRepository {
     private final Map<UUID, Person> people;
 
     public PersonRepository() {
-        people = new HashMap<>();
+        people = new ConcurrentHashMap<>();
     }
 
     public boolean existsByLogin(String suggestedLogin) {

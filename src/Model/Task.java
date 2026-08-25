@@ -2,7 +2,7 @@ package Model;
 
 import Exceptions.*;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.*;
 
 public class Task {
@@ -13,10 +13,10 @@ public class Task {
     private Priority priority;
     private Person executor;
     private final Person creator;
-    private final LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private final Instant createdAt;
+    private Instant updatedAt;
 
-    public Task(String name, Person creator, Priority priority) {
+    public Task(String name, Person creator, Priority priority) throws PersonException {
         if (creator == null)
             throw new IllegalArgumentException("The creator of the task cannot be null.");
         if (priority == null)
@@ -27,11 +27,11 @@ public class Task {
         this.creator = creator;
         this.status = Status.NEEDSTODO;
         this.priority = priority;
-        createdAt = LocalDateTime.now();
+        createdAt = Instant.now();
         updatedAt = createdAt;
     }
 
-    public Task(String name, String description, Person creator, Priority priority) {
+    public Task(String name, String description, Person creator, Priority priority) throws PersonException {
         this(name, creator, priority);
         validateDescription(description);
         this.description = description;
@@ -51,36 +51,39 @@ public class Task {
 
     public Person getCreator() { return this.creator; }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
+    public Instant getCreatedAt() { return createdAt; }
 
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public Instant getUpdatedAt() { return updatedAt; }
 
-    private void validateName(String name) {
-        if (name == null || name.isBlank())
-            throw new IllegalArgumentException("The name of the task cannot be empty.");
+    private void validateName(String name) throws PersonException {
+        if (name == null)
+            throw new IllegalArgumentException("The name of the task cannot be null.");
+        if (name.isBlank())
+            throw new PersonException("The name of the task cannot be empty.", name);
         if (name.length() < 3 || name.length() > 30)
-            throw new UncorrectException("The name of the task must be between 3 and 30 characters long.", name);
+            throw new PersonException("The name of the task must be between 3 and 30 characters long.", name);
         char[] cs = name.toCharArray();
         int cnt = 0;
         for (int i = 0; i < name.length(); i++) {
             if (Character.isWhitespace(cs[i])) cnt++;
-            if (cnt >= 7) throw new UncorrectException("The name of the task can contain up to 6 spaces.", name);
+            if (cnt >= 7)
+                throw new PersonException("The name of the task can contain up to 6 spaces.", name);
         }
     }
 
-    public void setName(String name) {
+    public void setName(String name) throws PersonException {
         validateName(name);
         this.name = name;
         setUpdatedAt();
     }
 
-    private void validateDescription(String description) {
+    private void validateDescription(String description) throws PersonException {
         if (description == null) return;
         if (description.length() > 350)
-            throw new UncorrectException("Description must be no more than 350 characters.", description);
+            throw new PersonException("Description must be no more than 350 characters.", description);
     }
 
-    public void setDescription(String description) {
+    public void setDescription(String description) throws PersonException {
         validateDescription(description);
         this.description = description;
         setUpdatedAt();
@@ -102,20 +105,20 @@ public class Task {
 
     public void setExecutor(Person executor) {
         if (Objects.equals(this.executor, executor))
-            throw new ExistException("This executor of this task has been changed.", executor.toString());
+            throw new IllegalArgumentException("The executor already is null.");
         this.executor = executor;
         setUpdatedAt();
     }
 
-    private void setUpdatedAt() { updatedAt = LocalDateTime.now(); }
+    private void setUpdatedAt() { updatedAt = Instant.now(); }
 
     @Override
     public String toString() {
-        return "_Task_\nTitle: " + getName() + ", description: " + (getDescription() == null ? "no" : getDescription())
+        return "_Task_\nTitle: " + getName() + ", \ndescription: " + (getDescription() == null ? "no" : getDescription())
                 + ",\ncreator: "
-        + creator.getLogin() + ", executor: " + (executor == null ? "not assigned" : executor.getLogin())
-                + ", priority: " + getPriority()
-        + ",status: " + getStatus() + ",\ncreated at " + getCreatedAt() + ", updated at " + getUpdatedAt();
+        + creator.getLogin() + ", \nexecutor: " + (executor == null ? "not assigned" : executor.getLogin())
+                + ", \npriority: " + getPriority()
+        + ", \nstatus: " + getStatus() + ",\ncreated at " + getCreatedAt() + ", \nupdated at " + getUpdatedAt();
     }
 
     @Override

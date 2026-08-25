@@ -4,14 +4,16 @@ import Exceptions.AdminException;
 import Exceptions.PersonException;
 import Model.*;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class TaskRepository {
     private final Map<UUID, Task> tasks;
 
     public TaskRepository() {
-        tasks = new HashMap<>();
+        tasks = new ConcurrentHashMap<>();
     }
 
     public void addTask(Task task) {
@@ -99,7 +101,7 @@ public class TaskRepository {
         return tasks.containsKey(id);
     }
 
-    public List<Task> getTasksCreatedBetween(LocalDateTime start, LocalDateTime finish) {
+    public List<Task> getTasksCreatedBetween(Instant start, Instant finish) {
         if (start == null || finish == null)
             throw new IllegalArgumentException("Object of LocalDateTime cannot be null.");
         if (start.compareTo(finish) > 0)
@@ -112,7 +114,7 @@ public class TaskRepository {
         return ts;
     }
 
-    public List<Task> getTasksUpdatedBetween(LocalDateTime start, LocalDateTime finish) {
+    public List<Task> getTasksUpdatedBetween(Instant start, Instant finish) {
         if (start == null || finish == null)
             throw new IllegalArgumentException("Object of LocalDateTime cannot be null.");
         if (start.compareTo(finish) > 0)
@@ -188,6 +190,15 @@ public class TaskRepository {
         int count = 0;
         for (Task temp : tasks.values()) {
             if (person.equals(temp.getExecutor()) && temp.getStatus() == Status.DONE)
+                count++;
+        }
+        return count;
+    }
+
+    public int getCountOfTasksToBeDone() {
+        int count = 0;
+        for (Task temp : tasks.values()) {
+            if (temp.getStatus() == Status.INPROCESS)
                 count++;
         }
         return count;

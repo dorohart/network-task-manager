@@ -5,6 +5,7 @@ import Model.*;
 import Repository.PersonRepository;
 import Repository.TaskRepository;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +22,7 @@ public class TaskService {
         this.personRep = personRep;
     }
 
-    public void create(String name, String description, Person creator, Priority priority) throws PersonException{
+    public synchronized void create(String name, String description, Person creator, Priority priority) throws PersonException{
         if (creator.getRole() != Role.ADMIN)
             throw new PersonException("Current person cannot create the task.", creator.toString());
         if (taskRep.getCountOfTasksInProcessByCreator(creator) >= 3)
@@ -34,7 +35,7 @@ public class TaskService {
         taskRep.addTask(task);
     }
 
-    public void delete(Person person, Task task) throws PersonException {
+    public synchronized void delete(Person person, Task task) throws PersonException {
         if (person == null)
             throw new IllegalArgumentException("Person cannot be null.");
         if (task == null)
@@ -60,13 +61,23 @@ public class TaskService {
 
     public List<Task> getTasksByStatus(Status status) { return taskRep.getTasksByStatus(status); }
 
-    public List<Task> getAll() { return taskRep.getAll(); }
+    public String[] getAllNames() {
+        String[] allNames = new String[taskRep.getCount()];
+        int cnt = 0;
+        for (Task t : taskRep.getAll()) {
+            if (cnt == allNames.length)
+                throw new IllegalArgumentException("The length of the array is greater than the number of people.");
+            allNames[cnt] = t.getName();
+            cnt++;
+        }
+        return allNames;
+    }
 
-    public List<Task> getTasksCreatedBetween(LocalDateTime start, LocalDateTime finish) {
+    public List<Task> getTasksCreatedBetween(Instant start, Instant finish) {
         return taskRep.getTasksCreatedBetween(start, finish);
     }
 
-    public List<Task> getTasksUpdatedBetween(LocalDateTime start, LocalDateTime finish) {
+    public List<Task> getTasksUpdatedBetween(Instant start, Instant finish) {
         return taskRep.getTasksUpdatedBetween(start, finish);
     }
 
@@ -121,17 +132,26 @@ public class TaskService {
             throw new PersonException("This person cannot change the task.", person.toString());
         if (task.getStatus() == status)
             throw new PersonException("You are already using this status.", status.toString());
+        if (status == Status.NEEDSTODO && task.getExecutor() != null && task.getStatus() != Status.DONE)
+            throw new PersonException("This task still has an executor.", task.toString());
+        if (status == Status.INPROCESS && task.getExecutor() == null && task.getStatus() != Status.DONE)
+            throw new PersonException("This task has no executor.", task.toString());
+        if (task.getStatus() == Status.DONE)
+            throw new PersonException("The status of a completed task cannot be changed.", task.toString());
         task.setStatus(status);
     }
 
-    public void removeExecutor(Person person, Task task) throws PersonException {
+    public synchronized void removeExecutor(Person person, Task task) throws PersonException {
         if (person == null)
             throw new IllegalArgumentException("Person cannot be null.");
         if (task == null)
             throw new IllegalArgumentException("Task cannot be null.");
-        if (!person.equals(task.getCreator()))
+        if (!person.equals(task.getCreator()) && !person.equals(task.getExecutor()))
             throw new PersonException("This person cannot remove the executor.", person.toString());
+        if (task.getExecutor() == null)
+            throw new PersonException("This task has no executor.", task.toString());
         task.setExecutor(null);
+        task.setStatus(Status.NEEDSTODO);
     }
 
     public Task getTaskByNumber(List<Task> tasks, int number) throws PersonException {
@@ -140,17 +160,20 @@ public class TaskService {
         if (tasks.isEmpty())
             throw new PersonException("Set of tasks is empty.", tasks.toString());
         if (number <= 0 || number > tasks.size())
-            throw new PersonException("Uncorrect number of task.", Integer.toString(number));
+            throw new PersonException("Please, enter the correct number of task.", Integer.toString(number));
         return tasks.get(number - 1);
     }
 
-    public void addExecutor(Person person, Task task) throws PersonException {
+    public synchronized void addExecutor(Person person, Task task) throws PersonException {
+        if (person == null)
+            throw new IllegalArgumentException("Person cannot be null.");
         if (task == null)
             throw new IllegalArgumentException("Task cannot be null.");
         if (taskRep.getCountOfTasksInProcessByExecutor(person) >= 3)
             throw new PersonException("Person cannot execute more that 3 tasks.", person.toString());
         if (task.getExecutor() != null)
-            throw new ExistException("This task already has an executor.", task.toString());
+            throw new PersonException("This task already has an executor.", task.toString());
         task.setExecutor(person);
+        task.setStatus(Status.INPROCESS);
     }
 }
