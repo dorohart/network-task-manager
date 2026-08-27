@@ -43,7 +43,8 @@ public class Command {
                         setOfTasks = null;
                     if (cmnd != SetOfCommand.delete_task && cmnd != SetOfCommand.change_task_name && cmnd != SetOfCommand.change_task_description
                             && cmnd != SetOfCommand.change_task_priority && cmnd != SetOfCommand.change_task_status
-                            && cmnd != SetOfCommand.execute_task && cmnd != SetOfCommand.drop_task && cmnd != SetOfCommand.remove_executor)
+                            && cmnd != SetOfCommand.execute_task && cmnd != SetOfCommand.drop_task && cmnd != SetOfCommand.remove_executor
+                            && cmnd != SetOfCommand.task_info)
                         selectedTask = null;
                     switch (cmnd) {
                         case help -> getCommands();
@@ -128,6 +129,12 @@ public class Command {
                                 throw new PersonException("Params is required.", "time params");
                             sortTaskUpdatedBetween(combo[1], combo[2]);
                         }
+                        case user_info -> {
+                            if (combo.length < 2 || combo[1].isBlank())
+                                throw new PersonException("Login is required.", input);
+                            userInfo(combo[1]);
+                        }
+                        case task_info -> taskInfo();
                     }
                 } catch (PersonException | AdminException | ExistUserException e) {
                     out.write(e.getMessage());
@@ -186,7 +193,7 @@ public class Command {
             if (s == SetOfCommand.delete_user || s == SetOfCommand.make_admin || s == SetOfCommand.search_user
                     || s == SetOfCommand.search_task_by_creator || s == SetOfCommand.search_task_by_executor
                     || s == SetOfCommand.search_task_by_name || s == SetOfCommand.search_task_by_status
-                    || s == SetOfCommand.search_task_by_priority)
+                    || s == SetOfCommand.search_task_by_priority || s == SetOfCommand.user_info)
                 out.write(s.name() + " <name>");
             else if (s == SetOfCommand.select_task)
                 out.write(s.name() + " <number>");
@@ -239,6 +246,9 @@ public class Command {
             String secretWord = readLine();
             try {
                 personServ.register(login, password, phone, email, secretWord);
+                out.write("Success!");
+                out.newLine();
+                out.flush();
             } catch (ExistUserException | PersonException e) {
                 out.write("Registration failed. " + e.getMessage());
                 out.newLine();
@@ -248,15 +258,16 @@ public class Command {
         else {
             try {
                 personServ.register(login, password, phone, email, null);
-            } catch (ExistUserException | PersonException e) {
+                out.write("Success!");
+                out.newLine();
+                out.flush();
+            }
+            catch (ExistUserException | PersonException e) {
                 out.write("Registration failed. " + e.getMessage());
                 out.newLine();
                 out.flush();
             }
         }
-        out.write("Success!");
-        out.newLine();
-        out.flush();
     }
 
     private void login() throws IOException, ExitException, PersonException {
@@ -273,7 +284,11 @@ public class Command {
         try {
             personServ.login(login, password);
             currentPerson = personServ.getPersonByLogin(login);
-        } catch (PersonException e) {
+            out.write("Success!");
+            out.newLine();
+            out.flush();
+        }
+        catch (PersonException e) {
             out.write("Login failed. " + e.getMessage());
             out.newLine();
             out.flush();
@@ -752,6 +767,7 @@ public class Command {
 
     private void sortTaskCreatedBetween(String start, String finish) throws IOException, PersonException {
         // 2026-08-22T12:34:56.123456789Z
+        requireLogin();
         Instant st, fin;
         try {
             st = Instant.parse(start);
@@ -773,6 +789,7 @@ public class Command {
 
     private void sortTaskUpdatedBetween(String start, String finish) throws IOException, PersonException {
         // 2026-08-22T12:34:56.123456789Z
+        requireLogin();
         Instant st, fin;
         try {
             st = Instant.parse(start);
@@ -812,10 +829,25 @@ public class Command {
         out.newLine();
         out.flush();
     }
+
+    private void userInfo(String login) throws IOException, PersonException {
+        requireLogin();
+        out.write(personServ.otherToString(login));
+        out.newLine();
+        out.flush();
+    }
+
+    private void taskInfo() throws IOException, PersonException {
+        requireLogin();
+        requireTask();
+        out.write(selectedTask.toString());
+        out.newLine();
+        out.flush();
+    }
  }
 
 //поправлен баг изза ошибки пользователя кидалось непроверяемое исключения
 //кастомные непроверяемые исключения были удалены
-//переход  с LocalDateTime на Instant
+//переход с LocalDateTime на Instant
 //добавлена многопоточность
 //написан сервер

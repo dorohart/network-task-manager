@@ -22,6 +22,9 @@ public enum SetOfCommand {
     delete_user, //combo
     make_admin, //combo
 
+    user_info, //combo
+    task_info, //
+
     create_task,
     delete_task, //
     my_created_tasks,

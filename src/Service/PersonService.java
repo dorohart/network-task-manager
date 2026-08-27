@@ -176,4 +176,10 @@ public class PersonService {
             throw new IllegalArgumentException("Id cannot be null.");
         return personRep.existsById(id);
     }
+
+    public String otherToString(String login) throws PersonException {
+        Person p = this.getPersonByLogin(login);
+        return "_Person " + login + "_\nname: " + p.getLogin() + ",\nemail: " + p.getEmail()
+                + ",\nphone number: " + p.getPhoneNumber() + ",\nrole: " + p.getRole();
+    }
 }

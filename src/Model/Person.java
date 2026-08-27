@@ -159,8 +159,9 @@ public class Person {
 
     @Override
     public String toString() {
-        return "_Person_\nId: " + getID() + ", \nname: " + getLogin() + ", \nemail: "
-                + getEmail() + ", \nphone number: " + getPhoneNumber() + ", \nrole: " + getRole();
+        return "_Person_\nID: " + getID() + ", \nname: " + getLogin() + ", \nemail: "
+                + getEmail() + ", \nphone number: " + getPhoneNumber() + ", \nsecret word: " + getSecretWord()
+                + ", \nrole: " + getRole();
     }
 
     @Override
