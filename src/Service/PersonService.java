@@ -180,6 +180,7 @@ public class PersonService {
     public String otherToString(String login) throws PersonException {
         Person p = this.getPersonByLogin(login);
         return "_Person " + login + "_\nname: " + p.getLogin() + ",\nemail: " + p.getEmail()
-                + ",\nphone number: " + p.getPhoneNumber() + ",\nrole: " + p.getRole();
+                + ",\nphone number: " + p.getPhoneNumber() + ",\nrole: " + p.getRole()
+                + ",\nregistered at: " + p.getRegisteredAt();
     }
 }

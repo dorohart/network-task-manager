@@ -3,6 +3,7 @@ package Model;
 import Exceptions.*;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 public class Task {
@@ -27,7 +28,7 @@ public class Task {
         this.creator = creator;
         this.status = Status.NEEDSTODO;
         this.priority = priority;
-        createdAt = Instant.now();
+        createdAt = Instant.now().truncatedTo(ChronoUnit.SECONDS);
         updatedAt = createdAt;
     }
 
@@ -110,7 +111,7 @@ public class Task {
         setUpdatedAt();
     }
 
-    private void setUpdatedAt() { updatedAt = Instant.now(); }
+    private void setUpdatedAt() { updatedAt = Instant.now().truncatedTo(ChronoUnit.SECONDS); }
 
     @Override
     public String toString() {

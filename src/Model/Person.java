@@ -1,6 +1,9 @@
 package Model;
 
 import Exceptions.*;
+
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 public class Person {
@@ -11,6 +14,7 @@ public class Person {
     private String phoneNumber;
     private String email;
     private String secretWord;
+    private final Instant registeredAt;
 
     public Person(String login, String password, String phoneNumber, String email) throws PersonException {
         validateLogin(login);
@@ -23,6 +27,7 @@ public class Person {
         this.role = Role.USER;
         this.phoneNumber = phoneNumber;
         this.email = email;
+        registeredAt = Instant.now().truncatedTo(ChronoUnit.SECONDS);
     }
 
     public Person(String login, String password, String phoneNumber, String email, String secretWord) throws PersonException{
@@ -44,6 +49,8 @@ public class Person {
     public String getSecretWord() { return secretWord; }
 
     public String getEmail() { return email; }
+
+    public Instant getRegisteredAt() { return registeredAt; }
 
     private void validateLogin(String login) throws PersonException {
         if (login == null)
@@ -161,7 +168,7 @@ public class Person {
     public String toString() {
         return "_Person_\nID: " + getID() + ", \nname: " + getLogin() + ", \nemail: "
                 + getEmail() + ", \nphone number: " + getPhoneNumber() + ", \nsecret word: " + getSecretWord()
-                + ", \nrole: " + getRole();
+                + ", \nrole: " + getRole() + ", \nregistered at: " + getRegisteredAt();
     }
 
     @Override
