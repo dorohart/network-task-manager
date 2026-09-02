@@ -2,6 +2,10 @@
 
 This client-server application is being created for task allocation between users of specific groups.
 
+Firstly, you should run the TablesTaskManager.sql file in a database client to create the database.
+
+Secondly, you should change URL field in PersonService and TaskService classes: enter your host, login and password to connect to your database.
+
 Client and server are run in different projects.
 
 Enter 'help' in the command line to see all commands of this project.

@@ -6,6 +6,7 @@ import Exceptions.*;
 
 import java.io.*;
 import java.net.*;
+import java.sql.SQLException;
 import java.time.DateTimeException;
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
@@ -147,6 +148,13 @@ public class Command {
                     out.flush();
                     return;
                 }
+                catch (SQLException e) {
+                    System.out.println("Database error.");
+                    e.printStackTrace();
+                    out.write("Database error. Try again later.");
+                    out.newLine();
+                    out.flush();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
                 return;
@@ -172,7 +180,7 @@ public class Command {
         throw new PersonException("Unknown command. Type 'help' to see available commands.", str);
     }
 
-    private void requireLogin() throws PersonException {
+    private void requireLogin() throws PersonException, SQLException {
         if (currentPerson == null)
             throw new PersonException("You must login first.", "current person");
         if (!personServ.existsById(currentPerson.getID())) {
@@ -206,7 +214,7 @@ public class Command {
         out.flush();
     }
 
-    private void register() throws IOException, ExitException {
+    private void register() throws IOException, ExitException, SQLException {
         out.write("Enter your login: ");
         out.newLine();
         out.flush();
@@ -270,7 +278,7 @@ public class Command {
         }
     }
 
-    private void login() throws IOException, ExitException, PersonException {
+    private void login() throws IOException, ExitException, PersonException, SQLException {
         out.write("Enter your login: ");
         out.newLine();
         out.flush();
@@ -295,7 +303,7 @@ public class Command {
         }
     }
 
-    private void logout() throws IOException, PersonException {
+    private void logout() throws IOException, PersonException, SQLException {
         requireLogin();
         currentPerson = null;
         selectedTask = null;
@@ -305,7 +313,7 @@ public class Command {
         out.flush();
     }
 
-    private void deleteAccount() throws IOException, PersonException, AdminException {
+    private void deleteAccount() throws IOException, PersonException, AdminException, SQLException {
         requireLogin();
         personServ.delete(currentPerson);
         currentPerson = null;
@@ -316,7 +324,7 @@ public class Command {
         out.flush();
     }
 
-    private void changeLogin() throws IOException, PersonException, ExistUserException, ExitException {
+    private void changeLogin() throws IOException, PersonException, ExistUserException, ExitException, SQLException {
         requireLogin();
 
         out.write("Enter your new login: ");
@@ -335,7 +343,7 @@ public class Command {
         out.flush();
     }
 
-    private void changePassword() throws IOException, PersonException, ExistUserException, ExitException {
+    private void changePassword() throws IOException, PersonException, ExistUserException, ExitException, SQLException {
         requireLogin();
 
         out.write("Enter your new password: ");
@@ -354,7 +362,7 @@ public class Command {
         out.flush();
     }
 
-    private void changePhoneNumber() throws IOException, PersonException, ExistUserException, ExitException {
+    private void changePhoneNumber() throws IOException, PersonException, ExistUserException, ExitException, SQLException {
         requireLogin();
 
         out.write("Enter your new phone number: ");
@@ -373,7 +381,7 @@ public class Command {
         out.flush();
     }
 
-    private void changeEmail() throws IOException, PersonException, ExistUserException, ExitException {
+    private void changeEmail() throws IOException, PersonException, ExistUserException, ExitException, SQLException {
         requireLogin();
 
         out.write("Enter your new email: ");
@@ -392,7 +400,7 @@ public class Command {
         out.flush();
     }
 
-    private void changeSecretWord() throws IOException, PersonException, ExistUserException, ExitException {
+    private void changeSecretWord() throws IOException, PersonException, ExistUserException, ExitException, SQLException {
         requireLogin();
 
         out.write("Enter your new secret word: ");
@@ -411,21 +419,21 @@ public class Command {
         out.flush();
     }
 
-    private void myInfo() throws IOException, PersonException {
+    private void myInfo() throws IOException, PersonException, SQLException {
         requireLogin();
         out.write(currentPerson.toString());
         out.newLine();
         out.flush();
     }
 
-    private void searchUser(String name) throws IOException, PersonException {
+    private void searchUser(String name) throws IOException, PersonException, SQLException {
         requireLogin();
         out.write(personServ.getPersonByLogin(name).toString());
         out.newLine();
         out.flush();
     }
 
-    private void listUser()  throws IOException, PersonException {
+    private void listUser()  throws IOException, PersonException, SQLException {
         requireLogin();
         String[] logins = personServ.getAllLogins();
         for (int i = 0; i < logins.length; i++) {
@@ -435,14 +443,14 @@ public class Command {
         out.flush();
     }
 
-    private void userCount() throws  IOException, PersonException {
+    private void userCount() throws  IOException, PersonException, SQLException {
         requireLogin();
         out.write("We are " + personServ.getCount() + " people.");
         out.newLine();
         out.flush();
     }
 
-    private void deleteUser(String name) throws IOException, PersonException {
+    private void deleteUser(String name) throws IOException, PersonException, SQLException {
         requireLogin();
         personServ.deleteOther(currentPerson, name);
         out.write("Success!");
@@ -450,7 +458,7 @@ public class Command {
         out.flush();
     }
 
-    private void makeAdmin(String name) throws IOException, PersonException, AdminException {
+    private void makeAdmin(String name) throws IOException, PersonException, AdminException, SQLException {
         requireLogin();
         personServ.makeAdmin(currentPerson, name);
         out.write("Success!");
@@ -458,7 +466,7 @@ public class Command {
         out.flush();
     }
 
-    private void createTask() throws IOException, PersonException, ExitException {
+    private void createTask() throws IOException, PersonException, ExitException, SQLException {
         requireLogin();
 
         out.write("Enter task name: ");
@@ -508,7 +516,7 @@ public class Command {
         out.flush();
     }
 
-    private void deleteTask() throws IOException, PersonException {
+    private void deleteTask() throws IOException, PersonException, SQLException {
         requireLogin();
         requireTask();
         taskServ.delete(currentPerson, selectedTask);
@@ -518,7 +526,7 @@ public class Command {
         out.flush();
     }
 
-    private void getCreatedTasks() throws IOException, PersonException {
+    private void getCreatedTasks() throws IOException, PersonException, SQLException {
         requireLogin();
         List<Task> tasks = taskServ.getTasksByCreator(currentPerson);
         if (tasks.size() == 0)
@@ -531,7 +539,7 @@ public class Command {
         setOfTasks = tasks;
     }
 
-    private void getExecutedTasks() throws IOException, PersonException {
+    private void getExecutedTasks() throws IOException, PersonException, SQLException {
         requireLogin();
         List<Task> tasks = taskServ.getTasksByExecutor(currentPerson);
         if (tasks.size() == 0)
@@ -544,7 +552,7 @@ public class Command {
         setOfTasks = tasks;
     }
 
-    private void selectTask(String number) throws IOException, PersonException {
+    private void selectTask(String number) throws IOException, PersonException, SQLException {
         requireLogin();
         if (setOfTasks == null)
             throw new PersonException("No task list selected. Search or get tasks first.", "select_task");
@@ -561,7 +569,7 @@ public class Command {
         out.flush();
     }
 
-    private void changeTaskName() throws IOException, PersonException, ExitException {
+    private void changeTaskName() throws IOException, PersonException, ExitException, SQLException {
         requireLogin();
         requireTask();
 
@@ -576,7 +584,7 @@ public class Command {
         out.flush();
     }
 
-    private void changeTaskDescription() throws IOException, PersonException, ExitException {
+    private void changeTaskDescription() throws IOException, PersonException, ExitException, SQLException {
         requireLogin();
         requireTask();
 
@@ -591,7 +599,7 @@ public class Command {
         out.flush();
     }
 
-    private void changeTaskStatus() throws IOException, PersonException, ExitException {
+    private void changeTaskStatus() throws IOException, PersonException, ExitException, SQLException {
         requireLogin();
         requireTask();
 
@@ -621,7 +629,7 @@ public class Command {
         out.flush();
     }
 
-    private void changeTaskPriority() throws IOException, PersonException, ExitException {
+    private void changeTaskPriority() throws IOException, PersonException, ExitException, SQLException {
         requireLogin();
         requireTask();
 
@@ -651,7 +659,7 @@ public class Command {
         out.flush();
     }
 
-    private void executeTask() throws IOException, PersonException {
+    private void executeTask() throws IOException, PersonException, SQLException {
         requireLogin();
         requireTask();
         taskServ.addExecutor(currentPerson, selectedTask);
@@ -660,7 +668,7 @@ public class Command {
         out.flush();
     }
 
-    private void removeExecutor() throws IOException, PersonException {
+    private void removeExecutor() throws IOException, PersonException, SQLException {
         requireLogin();
         requireTask();
         if (selectedTask.getExecutor().equals(currentPerson))
@@ -671,7 +679,7 @@ public class Command {
         out.flush();
     }
 
-    private void dropTask() throws IOException, PersonException {
+    private void dropTask() throws IOException, PersonException, SQLException {
         requireLogin();
         requireTask();
         if (!selectedTask.getExecutor().equals(currentPerson))
@@ -682,7 +690,7 @@ public class Command {
         out.flush();
     }
 
-    private void searchTaskByCreator(String login) throws IOException, PersonException {  //by kseniya
+    private void searchTaskByCreator(String login) throws IOException, PersonException, SQLException {  //by kseniya
         requireLogin();
         Person p = personServ.getPersonByLogin(login);
         List<Task> tasks = taskServ.getTasksByCreator(p);
@@ -696,7 +704,7 @@ public class Command {
         setOfTasks = tasks;
     }
 
-    private void searchTaskByExecutor(String login) throws IOException, PersonException {
+    private void searchTaskByExecutor(String login) throws IOException, PersonException, SQLException {
         requireLogin();
         Person p = personServ.getPersonByLogin(login);
         List<Task> tasks = taskServ.getTasksByExecutor(p);
@@ -710,7 +718,7 @@ public class Command {
         setOfTasks = tasks;
     }
 
-    private void searchTaskByName(String name) throws IOException, PersonException {
+    private void searchTaskByName(String name) throws IOException, PersonException, SQLException {
         requireLogin();
         List<Task> tasks = taskServ.getTasksByName(name);
         if (tasks.size() == 0)
@@ -723,7 +731,7 @@ public class Command {
         setOfTasks = tasks;
     }
 
-    private void searchTaskByPriority(String priority) throws IOException, PersonException {
+    private void searchTaskByPriority(String priority) throws IOException, PersonException, SQLException {
         List<Task> tasks;
         requireLogin();
         if (priority.equals("low"))
@@ -744,7 +752,7 @@ public class Command {
         setOfTasks = tasks;
     }
 
-    private void searchTaskByStatus(String status) throws IOException, PersonException {
+    private void searchTaskByStatus(String status) throws IOException, PersonException, SQLException {
         List<Task> tasks;
         requireLogin();
         if (status.equals("needstodo"))
@@ -765,7 +773,7 @@ public class Command {
         setOfTasks = tasks;
     }
 
-    private void sortTaskCreatedBetween(String start, String finish) throws IOException, PersonException {
+    private void sortTaskCreatedBetween(String start, String finish) throws IOException, PersonException, SQLException {
         // 2026-08-22T12:34:56.123456789Z
         requireLogin();
         Instant st, fin;
@@ -787,7 +795,7 @@ public class Command {
         setOfTasks = tasks;
     }
 
-    private void sortTaskUpdatedBetween(String start, String finish) throws IOException, PersonException {
+    private void sortTaskUpdatedBetween(String start, String finish) throws IOException, PersonException, SQLException {
         // 2026-08-22T12:34:56.123456789Z
         requireLogin();
         Instant st, fin;
@@ -809,7 +817,7 @@ public class Command {
         setOfTasks = tasks;
     }
 
-    private void listTask()  throws IOException, PersonException {
+    private void listTask()  throws IOException, PersonException, SQLException {
         requireLogin();
         String[] names = taskServ.getAllNames();
         if (names.length == 0)
@@ -823,21 +831,21 @@ public class Command {
         out.flush();
     }
 
-    private void taskCount() throws  IOException, PersonException {
+    private void taskCount() throws  IOException, PersonException, SQLException {
         requireLogin();
         out.write(taskServ.getCount() + " tasks created!");
         out.newLine();
         out.flush();
     }
 
-    private void userInfo(String login) throws IOException, PersonException {
+    private void userInfo(String login) throws IOException, PersonException, SQLException {
         requireLogin();
         out.write(personServ.otherToString(login));
         out.newLine();
         out.flush();
     }
 
-    private void taskInfo() throws IOException, PersonException {
+    private void taskInfo() throws IOException, PersonException, SQLException {
         requireLogin();
         requireTask();
         out.write(selectedTask.toString());

@@ -4,7 +4,7 @@ import Exceptions.*;
 import Model.*;
 import Repository.PersonRepository;
 import Repository.TaskRepository;
-
+import java.sql.SQLException;
 import java.util.UUID;
 
 public class PersonService {
@@ -18,7 +18,8 @@ public class PersonService {
         this.taskRep = taskRep;
     }
 
-    public synchronized void register(String login, String password, String phoneNumber, String email, String secretWord) throws  ExistUserException, PersonException {
+    public synchronized void register(String login, String password, String phoneNumber, String email, String secretWord)
+            throws  ExistUserException, PersonException, SQLException {
         if (personRep.existsByLogin(login))
             throw new ExistUserException("Person with this login already exist.", login);
         if (personRep.existsByPhoneNumber(phoneNumber))
@@ -31,11 +32,11 @@ public class PersonService {
         else
             person = new Person(login, password, phoneNumber, email, secretWord);
         if (personRep.getCountOfPeople() == 0)
-            person.setRole(Role.ADMIN);
+            personRep.updateRole(person);
         personRep.addPerson(person);
     }
 
-    public synchronized void delete(Person person) throws AdminException, PersonException {
+    public synchronized void delete(Person person) throws AdminException, PersonException, SQLException {
         if (taskRep.existsTasksByCreator(person))
             throw new PersonException("The person did not delete his tasks. Please, delete your tasks.", person.toString());
         if (taskRep.existsTasksByExecutor(person))
@@ -45,7 +46,7 @@ public class PersonService {
         personRep.deletePerson(person);
     }
 
-    public synchronized void deleteOther(Person person, String login) throws PersonException {
+    public synchronized void deleteOther(Person person, String login) throws PersonException, SQLException {
         if (person == null)
             throw new IllegalArgumentException("The current person cannot be null.");
         if (person.getRole() != Role.ADMIN)
@@ -56,12 +57,12 @@ public class PersonService {
         if (other.getRole() == Role.ADMIN)
             throw new PersonException("Cannot delete an admin.", personRep.getPersonByLogin(login).toString());
         for (Task task : taskRep.getTasksByExecutor(other)) {
-            task.setExecutor(null);
+            taskRep.updateExecutor(task);
         }
         personRep.deletePerson(other);
     }
 
-    public synchronized Person login(String login, String password) throws PersonException {
+    public synchronized Person login(String login, String password) throws PersonException, SQLException {
         if (password == null)
             throw new IllegalArgumentException("Password cannot be null.");
         Person person = personRep.getPersonByLogin(login);
@@ -72,7 +73,7 @@ public class PersonService {
         return person;
     }
 
-    public synchronized void changeLogin(Person person, String newLogin, String password) throws ExistUserException, PersonException {
+    public synchronized void changeLogin(Person person, String newLogin, String password) throws ExistUserException, PersonException, SQLException {
         if (person == null)
             throw new IllegalArgumentException("The current person cannot be null.");
         if (password == null)
@@ -81,10 +82,10 @@ public class PersonService {
             throw new ExistUserException("This login already exists.", newLogin);
         if (!person.getPassword().equals(password))
             throw new PersonException("Passwords do not match.", password);
-        person.setLogin(newLogin);
+        personRep.updateLogin(person, newLogin);
     }
 
-    public void changePassword(Person person, String newPassword, String code) throws PersonException, ExistUserException {
+    public void changePassword(Person person, String newPassword, String code) throws PersonException, ExistUserException, SQLException {
         if (person == null)
             throw new IllegalArgumentException("The current person cannot be null.");
         if (code == null)
@@ -93,10 +94,10 @@ public class PersonService {
             throw new PersonException("Invalid person code", code);
         if (person.getPassword().equals(newPassword))
             throw new ExistUserException("This password is the same as the old password.", newPassword);
-        person.setPassword(newPassword);
+        personRep.updatePassword(person, newPassword);
     }
 
-    public synchronized void changePhoneNumber(Person person, String newPhoneNumber, String code) throws PersonException, ExistUserException {
+    public synchronized void changePhoneNumber(Person person, String newPhoneNumber, String code) throws PersonException, ExistUserException, SQLException {
         if (person == null)
             throw new IllegalArgumentException("The current person cannot be null.");
         if (code == null)
@@ -107,10 +108,10 @@ public class PersonService {
             throw new PersonException("Invalid person code", code);
         if (person.getPhoneNumber().equals(newPhoneNumber))
             throw new ExistUserException("This phone number is the same as the old phone number.", newPhoneNumber);
-        person.setPhoneNumber(newPhoneNumber);
+        personRep.updatePhoneNumber(person, newPhoneNumber);
     }
 
-    public synchronized void changeEmail(Person person, String newEmail, String code) throws PersonException, ExistUserException {
+    public synchronized void changeEmail(Person person, String newEmail, String code) throws PersonException, ExistUserException, SQLException {
         if (person == null)
             throw new IllegalArgumentException("The current person cannot be null.");
         if (code == null)
@@ -121,10 +122,10 @@ public class PersonService {
             throw new PersonException("Invalid person code", code);
         if (person.getEmail().equals(newEmail))
             throw new ExistUserException("This email is the same as the old email.", newEmail);
-        person.setEmail(newEmail);
+        personRep.updateEmail(person, newEmail);
     }
 
-    public void changeSecretWord(Person person, String newSecretWord, String code) throws PersonException, ExistUserException {
+    public void changeSecretWord(Person person, String newSecretWord, String code) throws PersonException, ExistUserException, SQLException {
         if (person == null)
             throw new IllegalArgumentException("The current person cannot be null.");
         if (code == null)
@@ -133,16 +134,16 @@ public class PersonService {
             throw new PersonException("Invalid person code", code);
         if (person.getSecretWord().equals(newSecretWord))
             throw new ExistUserException("This secret word is the same as the old secret word.", newSecretWord);
-        person.setSecretWord(newSecretWord);
+        personRep.updateSecretWord(person, newSecretWord);
     }
 
-    public Person getPersonByLogin(String login) throws PersonException {
+    public Person getPersonByLogin(String login) throws PersonException, SQLException {
         if (!personRep.existsByLogin(login))
             throw new PersonException("Person with this login not found.", login);
         return personRep.getPersonByLogin(login);
     }
 
-    public String[] getAllLogins() {
+    public String[] getAllLogins() throws SQLException, PersonException {
         String[] allLogins = new String[personRep.getCountOfPeople()];
         int cnt = 0;
         for (Person p : personRep.getAll()) {
@@ -154,7 +155,7 @@ public class PersonService {
         return allLogins;
     }
 
-    public synchronized void makeAdmin(Person currentPerson, String loginOfUser) throws AdminException, PersonException {
+    public synchronized void makeAdmin(Person currentPerson, String loginOfUser) throws AdminException, PersonException, SQLException {
         if (currentPerson == null)
             throw new IllegalArgumentException("Current person cannot be null.");
         if (currentPerson.getRole() != Role.ADMIN)
@@ -164,20 +165,20 @@ public class PersonService {
             throw new PersonException("Person with this login not found.", loginOfUser);
         if (newAdmin.getRole() == Role.ADMIN)
             throw new PersonException("This person is already an admin.", newAdmin.toString());
-        newAdmin.setRole(Role.ADMIN);
+        personRep.updateRole(newAdmin);
     }
 
-    public int getCount() {
-        return personRep.getCount();
+    public int getCount() throws SQLException {
+        return personRep.getCountOfPeople();
     }
 
-    public synchronized boolean existsById(UUID id) {
+    public synchronized boolean existsById(UUID id) throws SQLException {
         if (id == null)
             throw new IllegalArgumentException("Id cannot be null.");
         return personRep.existsById(id);
     }
 
-    public String otherToString(String login) throws PersonException {
+    public String otherToString(String login) throws PersonException, SQLException {
         Person p = this.getPersonByLogin(login);
         return "_Person " + login + "_\nname: " + p.getLogin() + ",\nemail: " + p.getEmail()
                 + ",\nphone number: " + p.getPhoneNumber() + ",\nrole: " + p.getRole()

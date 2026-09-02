@@ -36,6 +36,27 @@ public class Person {
         this.secretWord = secretWord;
     }
 
+    public Person(UUID id, String login, String password, String phoneNumber, String email, String secretWord, Role role, Instant registeredAt) throws PersonException{
+        if (id == null)
+            throw new IllegalArgumentException("Id cannot be null.");
+        if (registeredAt == null)
+            throw new IllegalArgumentException("Time cannot be null");
+        validateLogin(login);
+        validatePassword(password);
+        validatePhoneNumber(phoneNumber);
+        validateEmail(email);
+        if (secretWord != null)
+            validateSecretWord(secretWord);
+        this.id = id;
+        this.login = login;
+        this.password = password;
+        this.phoneNumber = phoneNumber;
+        this.email = email;
+        this.secretWord = secretWord;
+        setRole(role);
+        this.registeredAt = registeredAt;
+    }
+
     public UUID getID() { return this.id; }
 
     public String getLogin() { return  this.login; }
@@ -52,7 +73,7 @@ public class Person {
 
     public Instant getRegisteredAt() { return registeredAt; }
 
-    private void validateLogin(String login) throws PersonException {
+    public void validateLogin(String login) throws PersonException {
         if (login == null)
             throw new IllegalArgumentException("Login cannot be null.");
         if (login.isBlank())
@@ -68,11 +89,10 @@ public class Person {
     }
 
     public void setLogin(String login) throws PersonException {
-        validateLogin(login);
         this.login = login;
     }
 
-    private void validatePassword(String password) throws PersonException {
+    public void validatePassword(String password) throws PersonException {
         if (password == null)
             throw new IllegalArgumentException("Password cannot be null.");
         if (password.isBlank())
@@ -93,11 +113,10 @@ public class Person {
     }
 
     public void setPassword(String password) throws PersonException {
-        validatePassword(password);
         this.password = password;
     }
 
-    private void validatePhoneNumber(String phoneNumber) throws PersonException {
+    public void validatePhoneNumber(String phoneNumber) throws PersonException {
         if (phoneNumber == null)
             throw new IllegalArgumentException("Phone number cannot be null.");
         if (phoneNumber.isBlank())
@@ -115,11 +134,10 @@ public class Person {
     }
 
     public void setPhoneNumber(String phoneNumber) throws PersonException {
-        validatePhoneNumber(phoneNumber);
         this.phoneNumber = phoneNumber;
     }
 
-    private void validateEmail(String email) throws PersonException {
+    public void validateEmail(String email) throws PersonException {
         if (email == null)
             throw new IllegalArgumentException("Email cannot be null.");
         if (email.isBlank())
@@ -140,11 +158,10 @@ public class Person {
     }
 
     public void setEmail(String email) throws PersonException {
-        validateEmail(email);
         this.email = email;
     }
 
-    private void validateSecretWord(String secretWord) throws PersonException {
+    public void validateSecretWord(String secretWord) throws PersonException {
         if (secretWord == null)
             throw new IllegalArgumentException("Secret word cannot be null.");
         if (secretWord.isBlank())
@@ -154,7 +171,6 @@ public class Person {
     }
 
     public void setSecretWord(String secretWord) throws PersonException{
-        validateSecretWord(secretWord);
         this.secretWord = secretWord;
     }
 
@@ -167,7 +183,7 @@ public class Person {
     @Override
     public String toString() {
         return "_Person_\nID: " + getID() + ", \nname: " + getLogin() + ", \nemail: "
-                + getEmail() + ", \nphone number: " + getPhoneNumber() + ", \nsecret word: " + getSecretWord()
+                + getEmail() + ", \nphone number: " + getPhoneNumber() + ", \nsecret word: " + (getSecretWord() == null ? "no" : getSecretWord())
                 + ", \nrole: " + getRole() + ", \nregistered at: " + getRegisteredAt();
     }
 

@@ -22,8 +22,8 @@ public class Task {
             throw new IllegalArgumentException("The creator of the task cannot be null.");
         if (priority == null)
             throw new IllegalArgumentException("The priority of the task cannot be null.");
-        validateName(name);
         this.id = UUID.randomUUID();
+        validateName(name);
         this.name = name;
         this.creator = creator;
         this.status = Status.NEEDSTODO;
@@ -36,6 +36,27 @@ public class Task {
         this(name, creator, priority);
         validateDescription(description);
         this.description = description;
+    }
+
+    public Task(UUID id, String name, String description, Status status, Priority priority, Person creator, Person executor, Instant createdAt, Instant updatedAt)
+            throws PersonException {
+        if (id == null)
+            throw new IllegalArgumentException("Id cannot be null.");
+        if (createdAt == null || updatedAt == null)
+            throw new IllegalArgumentException("Time cannot be null");
+        if (creator == null)
+            throw new IllegalArgumentException("Creator cannot be null.");
+        validateName(name);
+        this.id = id;
+        this.name = name;
+        validateDescription(description);
+        this.description = description;
+        setStatus(status);
+        setPriority(priority);
+        this.creator = creator;
+        this.executor = executor;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
     public Status getStatus() { return this.status; }
@@ -56,7 +77,7 @@ public class Task {
 
     public Instant getUpdatedAt() { return updatedAt; }
 
-    private void validateName(String name) throws PersonException {
+    public void validateName(String name) throws PersonException {
         if (name == null)
             throw new IllegalArgumentException("The name of the task cannot be null.");
         if (name.isBlank())
@@ -73,45 +94,42 @@ public class Task {
     }
 
     public void setName(String name) throws PersonException {
-        validateName(name);
         this.name = name;
-        setUpdatedAt();
     }
 
-    private void validateDescription(String description) throws PersonException {
+    public void validateDescription(String description) throws PersonException {
         if (description == null) return;
         if (description.length() > 350)
             throw new PersonException("Description must be no more than 350 characters.", description);
     }
 
     public void setDescription(String description) throws PersonException {
-        validateDescription(description);
         this.description = description;
-        setUpdatedAt();
     }
 
     public void setStatus(Status st) {
         if (st == null)
             throw new IllegalArgumentException("The status of the task cannot be null.");
         this.status = st;
-        setUpdatedAt();
     }
 
     public void setPriority(Priority pr) {
         if (pr == null)
             throw new IllegalArgumentException("The priority of the task cannot be null.");
         this.priority = pr;
-        setUpdatedAt();
     }
 
     public void setExecutor(Person executor) {
         if (Objects.equals(this.executor, executor))
             throw new IllegalArgumentException("The executor already is null.");
         this.executor = executor;
-        setUpdatedAt();
     }
 
-    private void setUpdatedAt() { updatedAt = Instant.now().truncatedTo(ChronoUnit.SECONDS); }
+    public void setUpdatedAt(Instant inst) {
+        if (inst == null)
+            throw new IllegalArgumentException("Time cannot be null");
+        this.updatedAt = inst;
+    }
 
     @Override
     public String toString() {
